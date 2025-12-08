@@ -1,0 +1,41 @@
+body {
+    background: url('/frontend/images/sport-bg4.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-box {
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 15px;
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 420px;
+    width: 100%;
+}
+.ball-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw; /* penuh lebar layar */
+    height: 100vh; /* penuh tinggi layar */
+    object-fit: cover; /* biar proporsional */
+    z-index: 5;
+    pointer-events: none;
+    opacity: 1; /* atau 0.8 jika ingin efek lembut */
+}
+
+
+

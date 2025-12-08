@@ -1,0 +1,98 @@
+/* Container chat untuk admin */
+.admin-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    padding: 20px;
+    background-color: #f1f1f1;
+}
+
+/* Header chat khusus untuk admin */
+.admin-chat-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background: #ffffff;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.admin-chat-header .back-btn {
+    font-size: 20px;
+    color: #000;
+    margin-right: 10px;
+}
+
+.admin-chat-header h3 {
+    font-size: 18px;
+    margin: 0;
+    color: #333;
+}
+
+/* Pesan chat admin */
+.admin-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+/* Pesan admin */
+/* Bubble Pesan Admin */
+.admin-chat-message.admin {
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}
+
+/* Bubble Pesan Pengguna */
+.admin-chat-message.me {
+    justify-content: flex-end;
+}
+
+/* Nama Pengirim (pindah ke atas pesan) */
+.sender-name {
+    font-weight: bold;
+    color: #0078D4;
+    margin-bottom: 5px; /* Jarak antara nama dan pesan */
+}
+
+/* Bubble pesan pengguna */
+.admin-chat-message.me {
+    justify-content: flex-end;
+    background-color: #0078D4;
+    color: #fff;
+    border-radius: 18px 18px 0 18px;
+}
+
+/* Input pesan admin */
+.admin-message-input {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.admin-message-input textarea {
+    width: 85%;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    resize: none;
+    min-height: 40px;
+}
+
+.admin-message-input button {
+    background-color: #0078D4;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    padding: 12px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.admin-message-input button:hover {
+    background-color: #005c99;
+}

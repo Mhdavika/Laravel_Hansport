@@ -1,0 +1,123 @@
+/* Container chat */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    padding: 20px;
+    background-color: #f1f1f1;
+}
+
+/* Header chat */
+.chat-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background: #ffffff;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.chat-header .back-btn {
+    font-size: 20px;
+    color: #000;
+    margin-right: 10px;
+}
+
+.chat-header h3 {
+    font-size: 18px;
+    margin: 0;
+    color: #333;
+}
+
+/* Menyembunyikan navbar saat di halaman chat */
+body.chat-page .navbar {
+    display: none;
+}
+
+/* Pesan chat */
+.messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+/* Menyusun pesan pengguna dan admin */
+.chat-message {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 10px;
+}
+
+/* Pesan pengguna */
+.chat-message.me {
+    justify-content: flex-end;
+}
+
+/* Pesan admin */
+.chat-message.admin {
+    justify-content: flex-start;
+}
+
+/* Bubble pesan */
+.message-bubble {
+    max-width: 70%;
+    padding: 12px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    background-color: #f0f0f0;
+    word-wrap: break-word;
+    position: relative;
+}
+
+/* Bubble pesan pengguna */
+.chat-message.me .message-bubble {
+    background-color: #0078D4;
+    color: #fff;
+    border-radius: 18px 18px 0 18px; /* Untuk memberikan sudut lengkung di sisi kanan */
+}
+
+/* Bubble pesan admin */
+.chat-message.admin .message-bubble {
+    background-color: #E5E5E5;
+    color: #000;
+    border-radius: 18px 18px 18px 0; /* Untuk memberikan sudut lengkung di sisi kiri */
+}
+
+/* Input pesan */
+.message-input {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.message-input textarea {
+    width: 85%;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    resize: none;
+    min-height: 40px;
+}
+
+.message-input button {
+    background-color: #0078D4;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    padding: 12px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.message-input button:hover {
+    background-color: #005c99;
+}
+/* Menyembunyikan navbar saat berada di halaman chat */
+body.chat-page .navbar {
+    display: none;
+}

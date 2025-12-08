@@ -1,0 +1,357 @@
+*
+{
+	margin: 0;
+	padding: 0;
+}
+body
+{
+	font-family: 'Poppins', sans-serif;
+	font-size: 14px;
+	line-height: 23px;
+	font-weight: 400;
+	background: #FFFFFF;
+	color: #1e1e27;
+}
+div
+{
+	display: block;
+	position: relative;
+	-webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+ul
+{
+	list-style: none;
+	margin-bottom: 0px;
+}
+p
+{
+	font-family: 'Poppins', sans-serif;
+	font-size: 14px;
+	line-height: 1.7;
+	font-weight: 500;
+	color: #51545f;
+	-webkit-font-smoothing: antialiased;
+	-webkit-text-shadow: rgba(0,0,0,.01) 0 0 1px;
+	text-shadow: rgba(0,0,0,.01) 0 0 1px;
+}
+p a
+{
+	display: inline;
+	position: relative;
+	color: inherit;
+	border-bottom: solid 2px #fde0db;
+	-webkit-transition: all 200ms ease;
+	-moz-transition: all 200ms ease;
+	-ms-transition: all 200ms ease;
+	-o-transition: all 200ms ease;
+	transition: all 200ms ease;
+}
+a, a:hover, a:visited, a:active, a:link
+{
+	text-decoration: none;
+	-webkit-font-smoothing: antialiased;
+	-webkit-text-shadow: rgba(0,0,0,.01) 0 0 1px;
+	text-shadow: rgba(0,0,0,.01) 0 0 1px;
+}
+p a:active
+{
+	position: relative;
+	color: #FF6347;
+}
+p a:hover
+{
+	color: #FF6347;
+	background: #fde0db;
+}
+p a:hover::after
+{
+	opacity: 0.2;
+}
+::selection
+{
+	background: #fde0db;
+	color: #FF6347;
+}
+p::selection
+{
+	background: #fde0db;
+}
+h1{font-size: 72px;}
+h2{font-size: 36px;}
+h3{font-size: 28px;}
+h4{font-size: 24px;}
+h5{font-size: 16px;}
+h6{font-size: 14px;}
+h1, h2, h3, h4, h5, h6
+{
+	font-family: 'Poppins', sans-serif;
+	color: #282828;
+	-webkit-font-smoothing: antialiased;
+	-webkit-text-shadow: rgba(0,0,0,.01) 0 0 1px;
+	text-shadow: rgba(0,0,0,.01) 0 0 1px;
+}
+h1::selection,
+h2::selection,
+h3::selection,
+h4::selection,
+h5::selection,
+h6::selection
+{
+
+}
+
+.form-control
+{
+	color: #db5246;
+}
+section
+{
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+}
+.clear
+{
+	clear: both;
+}
+.clearfix::before, .clearfix::after
+{
+	content: "";
+	display: table;
+}
+.clearfix::after
+{
+	clear: both;
+}
+.clearfix
+{
+	zoom: 1;
+}
+.float_left
+{
+	float: left;
+}
+.float_right
+{
+	float: right;
+}
+.trans_200
+{
+	-webkit-transition: all 200ms ease;
+	-moz-transition: all 200ms ease;
+	-ms-transition: all 200ms ease;
+	-o-transition: all 200ms ease;
+	transition: all 200ms ease;
+}
+.trans_300
+{
+	-webkit-transition: all 300ms ease;
+	-moz-transition: all 300ms ease;
+	-ms-transition: all 300ms ease;
+	-o-transition: all 300ms ease;
+	transition: all 300ms ease;
+}
+.trans_400
+{
+	-webkit-transition: all 400ms ease;
+	-moz-transition: all 400ms ease;
+	-ms-transition: all 400ms ease;
+	-o-transition: all 400ms ease;
+	transition: all 400ms ease;
+}
+.trans_500
+{
+	-webkit-transition: all 500ms ease;
+	-moz-transition: all 500ms ease;
+	-ms-transition: all 500ms ease;
+	-o-transition: all 500ms ease;
+	transition: all 500ms ease;
+}
+.fill_height
+{
+	height: 100%;
+}
+.super_container
+{
+	width: 100%;
+	overflow: hidden;
+}
+
+/* Tambahan khusus halaman profil */
+.profile-page {
+    padding-top: 140px; /* agar tidak tertutup navbar */
+}
+
+/* Breadcrumb style khusus halaman profil */
+.breadcrumbs {
+	width: 100%;
+	height: 60px;
+	border-bottom: solid 1px #ebebeb;
+	margin-bottom: 30px;
+}
+
+.breadcrumbs ul li {
+	display: inline-block;
+	margin-right: 17px;
+}
+
+.breadcrumbs ul li.active a {
+	color: #b9b4c7;
+}
+
+.breadcrumbs ul li i {
+	margin-right: 17px;
+}
+
+.breadcrumbs ul li a {
+	color: #51545f;
+}
+
+#editForm {
+    transition: all 0.3s ease-in-out;
+}
+
+.profile-wrapper {
+    display: flex;
+    align-items: stretch;
+    min-height: 100%; /* atau 100vh jika butuh layar penuh */
+}
+
+.profile-sidebar {
+    border-right: 1px solid #e0e0e0;
+    background: #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: auto;
+}
+
+.profile-main {
+    flex: 1;
+    padding: 30px 40px;
+    background-color: #fff;
+}
+
+.container {
+    height: 100%;
+}
+
+.profile-header h5 {
+    margin: 10px 0 5px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.profile-header p {
+    font-size: 13px;
+    color: #888;
+}
+
+.profile-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-menu li {
+    margin-bottom: 15px;
+}
+
+.profile-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 200 !important; /* tidak bold */
+    color: #aaa; /* abu pudar untuk default */
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.profile-menu li.active {
+    border-left: 3px solid #000;
+    background-color: #f9f9f9;
+}
+
+.profile-menu li.active a {
+    color: #333; /* warna lebih jelas tapi tetap normal */
+    font-weight: normal;
+}
+input.form-control,
+textarea.form-control,
+select.form-control {
+    font-size: 13px !important;
+    color: #1e1e27 !important;
+}
+
+input.form-control::placeholder,
+textarea.form-control::placeholder,
+select.form-control::placeholder {
+    font-size: 13px !important;
+    color: #999 !important;
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+    color: #bbb !important;         /* lebih abu muda daripada #999 */
+    font-weight: 200 !important;    /* jangan terlalu tebal */
+    opacity: 1 !important;          /* pastikan tidak transparan */
+}
+
+.profile-header h5 {
+    font-weight: 400 !important;
+}
+.profile-header p.text-muted {
+    font-weight: 400 !important;
+    color: #888;
+}
+.profile-wrapper {
+    display: flex;
+    gap: 30px;
+    flex-wrap: nowrap;
+}
+
+.profile-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+}
+
+.product-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.product-item {
+    width: calc(25% - 30px); /* 4 kolom per baris */
+    min-width: 240px;
+    max-width: 300px;
+}
+
+.product_image img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+.camera-icon {
+    position: absolute;
+    right: -5px;
+    bottom: 10px;
+    background-color: #ff3b6e;
+    color: white;
+    border-radius: 50%;
+    padding: 6px;
+    font-size: 14px;
+    border: 2px solid white;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

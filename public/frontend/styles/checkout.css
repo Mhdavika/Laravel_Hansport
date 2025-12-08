@@ -1,0 +1,83 @@
+body {
+    padding-top: 100px; /* Sesuaikan dengan tinggi navbar */
+}
+
+/* breadcrumb */
+.breadcrumbs {
+	width: 100%;
+	height: 60px;
+	border-bottom: solid 1px #ebebeb;
+	margin-bottom: 30px;
+}
+
+.breadcrumbs ul li {
+	display: inline-block;
+	margin-right: 17px;
+}
+
+.breadcrumbs ul li.active a {
+	color: #b9b4c7;
+}
+
+.breadcrumbs ul li i {
+	margin-right: 17px;
+}
+
+.breadcrumbs ul li a {
+	color: #51545f;
+}
+/* Warna teks input */
+form input,
+form textarea,
+form select {
+    color: #000 !important;
+}
+
+/* Jika pakai validasi atau is-invalid Bootstrap */
+form input.is-invalid,
+form textarea.is-invalid {
+    color: #000 !important;
+}
+.btn-dark-checkout {
+    background-color: #1e1e26 !important;
+    color: #fff !important;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-dark-checkout:hover {
+    background-color: #111118 !important;
+}
+.form-select {
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #fff;
+}
+
+.form-select:focus {
+    border-color: #1e1e26;
+    box-shadow: 0 0 0 2px rgba(30, 30, 38, 0.2);
+    outline: none;
+}
+
+.form-select option {
+    padding: 8px;
+}
+/* Tambahkan padding kiri ke semua radio */
+.form-check {
+    padding-left: 1.25rem; /* atau 20px */
+}
+
+/* Ratakan dropdown agar sejajar dengan label radio */
+#bank-options,
+#ewallet-options {
+    margin-left: 1.25rem; /* sama dengan padding-left .form-check */
+}

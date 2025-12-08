@@ -1,0 +1,69 @@
+.add_to_cart_button {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Hilangkan ketebalan tombol */
+label {
+    font-weight: normal !important;
+}
+
+/* Warna (dot radio) */
+.color-options {
+    display: flex;
+    gap: 12px;
+}
+
+.color-options label {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #aaa;
+    /* agar tetap terlihat saat warna terang */
+    display: inline-block;
+}
+
+.color-options input {
+    display: none;
+}
+
+.color-options input:checked + label {
+    border: 2px solid #000;
+}
+
+/* Warna (bulatan satu warna saja tanpa radio) */
+.color-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #aaa;
+    /* agar yellow tetap terlihat */
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    /* efek kontras tambahan */
+    display: inline-block;
+}
+
+/* Ukuran */
+.size-options {
+    display: flex;
+    gap: 12px;
+}
+
+.size-options input {
+    display: none;
+}
+
+.size-options label {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: normal;
+    transition: all 0.2s;
+}
+
+.size-options input:checked + label {
+    border: 2px solid #000;
+    background-color: #f2f2f2;
+}
