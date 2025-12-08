@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
+use App\Models\Order;
 use App\Models\Cart;
 use App\Models\OrderItem;
-use Illuminate\Support\Facades\Log;
+
 use Laravolt\Indonesia\Models\Province;
+use Laravolt\Indonesia\Models\City;
+use App\Models\Kabupaten; // kalau nggak dipakai boleh dihapus
 
 class CheckoutController extends Controller
 {
@@ -20,7 +24,7 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil data provinsi untuk dropdown alamat
+        // ✅ SUDAH 1 INDONESIA: ambil semua provinsi dari Laravolt
         $provinces = Province::orderBy('name')->get();
 
         // Terima parameter `cart_ids` (GET) atau `cart_items`, atau fallback ke session
@@ -63,7 +67,6 @@ class CheckoutController extends Controller
             'city'           => 'required|string',
             'district'       => 'required|string',
             'address'        => 'required|string',
-            // COD DIHAPUS → hanya transfer & ewallet
             'payment_method' => 'required|in:transfer,ewallet',
             'bank_name'      => 'required_if:payment_method,transfer',
             'ewallet_name'   => 'required_if:payment_method,ewallet',
@@ -71,7 +74,6 @@ class CheckoutController extends Controller
 
         $user = Auth::user();
 
-        // Ambil cart_ids yang dipilih dari session
         $cartIds = session('checkout_cart_ids', []);
 
         if (empty($cartIds)) {
@@ -115,8 +117,8 @@ class CheckoutController extends Controller
             'ewallet_name'   => $request->ewallet_name,
             'total_price'    => $total,
             'status'         => 'pending',
-            // ⬇️ batas waktu pembayaran: 24 jam dari sekarang
-            'expires_at'     => now()->addMinutes(1),
+            // ⬇️ batas waktu pembayaran
+            'expires_at'     => now()->addHours(24),
         ];
 
         session(['checkout_data' => $orderData]);
@@ -144,15 +146,12 @@ class CheckoutController extends Controller
 
     /**
      * Finalisasi pesanan (simpan ke database).
-     * - Bukti pembayaran: hanya gambar (jpg,jpeg,png,webp) max 5MB.
-     * - Cek juga apakah sudah melewati batas waktu pembayaran.
      */
     public function finalize(Request $request)
     {
-        // Validasi bukti pembayaran
         $request->validate(
             [
-                'proof' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120', // 5MB
+                'proof' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             ],
             [
                 'proof.image' => 'File bukti harus berupa gambar.',
@@ -169,22 +168,18 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.index')->with('error', 'Data tidak ditemukan.');
         }
 
-        // Cek batas waktu pembayaran sebelum simpan
         if (!empty($data['expires_at']) && now()->greaterThan($data['expires_at'])) {
             return redirect()->route('cart.index')->with('error', 'Batas waktu pembayaran sudah berakhir. Silakan buat pesanan baru.');
         }
 
-        // Simpan order ke database (expires_at sudah ada di $data)
         $order = Order::create($data);
         session(['order_id' => $order->id]);
 
-        // Upload bukti pembayaran (jika ada)
         if ($request->hasFile('proof')) {
             $path = $request->file('proof')->store('bukti-transfer', 'public');
             $order->proof_file = $path;
         }
 
-        // Simpan item pesanan hanya dari cart_ids yang dipilih
         $cartItems = Cart::with('product')
             ->where('user_id', $user->id)
             ->whereIn('id', $cartIds)
@@ -210,24 +205,18 @@ class CheckoutController extends Controller
             }
         }
 
-        // Hapus hanya cart yang sudah di-checkout
         Cart::where('user_id', $user->id)
             ->whereIn('id', $cartIds)
             ->delete();
 
         $order->save();
 
-        // Bersihkan session
         session()->forget('checkout_data');
         session()->forget('checkout_cart_ids');
 
         return redirect()->route('checkout.success')->with('success', 'Pesanan berhasil dibuat! Silakan lakukan pembayaran sebelum batas waktu yang ditentukan.');
     }
 
-    /**
-     * Upload bukti pembayaran (kalau masih mau dipakai terpisah).
-     * Sekarang juga dibatasi hanya gambar max 5MB.
-     */
     public function uploadProof(Request $request)
     {
         $request->validate(
@@ -251,11 +240,79 @@ class CheckoutController extends Controller
         return redirect()->route('checkout.success')->with('success', 'Bukti pembayaran berhasil dikirim!');
     }
 
-    /**
-     * Halaman sukses setelah proses selesai.
-     */
     public function success()
     {
         return view('frontend.checkout.success');
+    }
+
+    /**
+     * ✅ Cek ongkir SE-INDONESIA berdasarkan jarak dari toko (Bogor) ke kota tujuan.
+     */
+    public function cekOngkir(Request $request)
+    {
+        $request->validate([
+            'city_id'  => 'required',
+            'subtotal' => 'required|numeric',
+        ]);
+
+        $subtotal = (int) $request->subtotal;
+        $cityId   = $request->city_id;
+
+        // Koordinat toko (Bogor)
+        $asalLat = -6.599403325394194;
+        $asalLng = 106.81231178112644;
+
+        $city = City::findOrFail($cityId);
+
+        // meta menyimpan JSON: {"lat":"...","long":"..."}
+        $meta = is_array($city->meta) ? $city->meta : json_decode($city->meta, true);
+
+        if (!$meta || empty($meta['lat']) || empty($meta['long'])) {
+            // kalau koordinat belum ada → kasih ongkir default
+            $jarakKm = null;
+            $ongkir  = 40000;
+        } else {
+            $tujuanLat = (float) $meta['lat'];
+            $tujuanLng = (float) $meta['long'];
+
+            $jarakKm = $this->hitungJarak($asalLat, $asalLng, $tujuanLat, $tujuanLng);
+
+            if ($jarakKm <= 20) {
+                $ongkir = 10000;
+            } elseif ($jarakKm <= 100) {
+                $ongkir = 20000;
+            } elseif ($jarakKm <= 250) {
+                $ongkir = 40000;
+            } elseif ($jarakKm <= 750) {
+                $ongkir = 60000;
+            } else {
+                $ongkir = 100000;
+            }
+        }
+
+        return response()->json([
+            'jarak_km' => $jarakKm ? round($jarakKm, 2) : null,
+            'ongkir'   => $ongkir,
+            'total'    => $subtotal + $ongkir,
+        ]);
+    }
+
+    /**
+     * Helper hitung jarak (KM) pakai Haversine.
+     */
+    private function hitungJarak(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        $earthRadius = 6371; // km
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
     }
 }

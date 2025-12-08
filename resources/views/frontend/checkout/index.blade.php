@@ -9,7 +9,6 @@
 @section('content')
 <div class="container py-5">
 
-    <!-- Breadcrumb -->
     @include('layouts.breadcrumbs')
 
     <h2 class="mb-4">Checkout</h2>
@@ -18,7 +17,7 @@
         @csrf
         <div class="row">
 
-            <!-- Alamat Pengiriman -->
+            <!-- ================= ALAMAT ================= -->
             <div class="col-md-8">
                 <div class="card p-4 mb-4">
                     <h5 class="mb-3">Alamat Pengirim</h5>
@@ -26,155 +25,146 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Nama *</label>
-                            <input
-                                type="text"
-                                name="name"
-                                class="form-control"
-                                value="{{ old('name', $user->name) }}"
-                                placeholder="Contoh: Alfian Rahman"
-                                required>
+                            <input type="text" name="name" class="form-control"
+                                   value="{{ old('name', $user->name) }}" required>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Email *</label>
-                            <input
-                                type="email"
-                                name="email"
-                                class="form-control"
-                                value="{{ old('email', $user->email) }}"
-                                placeholder="Email aktif, contoh: alfian@mail.com"
-                                required>
+                            <input type="email" name="email" class="form-control"
+                                   value="{{ old('email', $user->email) }}" required>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">No. Telepon *</label>
-                            <input
-                                type="text"
-                                name="phone"
-                                class="form-control"
-                                value="{{ old('phone', $user->phone) }}"
-                                placeholder="Contoh: 0812xxxxxxxx"
-                                required>
+                            <input type="text" name="phone" class="form-control"
+                                   value="{{ old('phone', $user->phone) }}" required>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Kode Pos *</label>
-                            <input
-                                type="text"
-                                name="postal_code"
-                                class="form-control"
-                                value="{{ old('postal_code', $user->postal_code) }}"
-                                placeholder="Contoh: 40115"
-                                required>
+                            <input type="text" name="postal_code" class="form-control"
+                                   value="{{ old('postal_code', $user->postal_code) }}" required>
                         </div>
 
-                        {{-- PROVINSI --}}
+                        <!-- PROVINSI -->
                         <div class="col-md-6">
                             <label class="form-label">Provinsi *</label>
                             <select name="province" id="province" class="form-control" required>
                                 <option value="">-- Pilih Provinsi --</option>
-                                @if(isset($provinces) && $provinces->count())
-                                    @foreach($provinces as $prov)
-                                        <option value="{{ $prov->id }}" {{ old('province') == $prov->id ? 'selected' : '' }}>{{ $prov->name }}</option>
-                                    @endforeach
-                                @endif
-                                {{-- opsi juga akan diisi via JS dari /ajax/provinces jika tersedia --}}
                             </select>
-                            <small class="text-muted">Saat ini pengiriman difokuskan ke wilayah Pulau Jawa.</small>
                         </div>
 
-                        {{-- KOTA / KABUPATEN --}}
+                        <!-- KABUPATEN -->
                         <div class="col-md-6">
                             <label class="form-label">Kota / Kabupaten *</label>
                             <select name="city" id="city" class="form-control" required>
                                 <option value="">-- Pilih Kota / Kabupaten --</option>
                             </select>
-                            <small class="text-muted">Pilih kota/kabupaten tujuan pengiriman.</small>
                         </div>
 
-                        {{-- KECAMATAN --}}
+                        <!-- KECAMATAN -->
                         <div class="col-md-6">
                             <label class="form-label">Kecamatan *</label>
                             <select name="district" id="district" class="form-control" required>
                                 <option value="">-- Pilih Kecamatan --</option>
                             </select>
-                            <small class="text-muted">Pilih kecamatan tujuan pengiriman.</small>
                         </div>
 
                         <div class="col-md-12">
                             <label class="form-label">Alamat Lengkap *</label>
-                            <textarea
-                                name="address"
-                                rows="3"
-                                class="form-control"
-                                placeholder="Contoh: Jl. Sukajadi No.10, RT 02 RW 03, dekat minimarket X"
-                                required>{{ old('address', $user->address) }}</textarea>
+                            <textarea name="address" rows="3" class="form-control" required>{{ old('address', $user->address) }}</textarea>
                         </div>
+
                     </div>
                 </div>
             </div>
 
-            <!-- Ringkasan Pesanan & Metode Bayar -->
+            <!-- ================= RINGKASAN & PEMBAYARAN ================= -->
             <div class="col-md-4">
                 <div class="card p-4 mb-4">
                     <h5 class="mb-3">Ringkasan Pesanan</h5>
 
                     @foreach ($cartItems as $item)
                         <div class="d-flex justify-content-between mb-2">
-                            <div>
-                                <small>{{ $item->product->name }}</small><br>
-                                <small>
-                                    Kuantitas: {{ $item->quantity }}
-                                    {{ $item->size ? ', Ukuran: '.$item->size : '' }}
-                                </small>
-                            </div>
+                            <small>{{ $item->product->name }} ({{ $item->quantity }})</small>
                             <strong>Rp{{ number_format($item->product->price * $item->quantity, 0, ',', '.') }}</strong>
                         </div>
                     @endforeach
 
                     <hr>
+
+                    @php $subtotal = $total; @endphp
+
                     <div class="d-flex justify-content-between">
                         <span>Subtotal:</span>
-                        <strong>Rp{{ number_format($total, 0, ',', '.') }}</strong>
+                        <strong id="subtotal" data-subtotal="{{ $subtotal }}">
+                            Rp{{ number_format($subtotal, 0, ',', '.') }}
+                        </strong>
                     </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Ongkir:</span>
+                        <strong id="ongkir">Rp0</strong>
+                    </div>
+
+                    <hr>
+
                     <div class="d-flex justify-content-between">
                         <span>Total Pembayaran:</span>
-                        <strong>Rp{{ number_format($total, 0, ',', '.') }}</strong>
+                        <strong id="total">
+                            Rp{{ number_format($subtotal, 0, ',', '.') }}
+                        </strong>
                     </div>
                 </div>
 
+                <!-- METODE PEMBAYARAN -->
                 <div class="card p-4">
                     <h5 class="mb-3">Pilih Metode Pembayaran</h5>
 
-                    {{-- Hanya transfer & e-wallet --}}
+                    {{-- Transfer Bank --}}
                     <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="payment_method" value="transfer" id="transfer" required>
+                        <input class="form-check-input" type="radio" name="payment_method"
+                               value="transfer" id="transfer" {{ old('payment_method') == 'transfer' ? 'checked' : '' }} required>
                         <label class="form-check-label" for="transfer">Transfer Bank</label>
                     </div>
-                    <div class="ms-4 mb-3 d-none" id="bank-options">
+                    <div class="ms-4 mb-3 {{ old('payment_method') == 'transfer' ? '' : 'd-none' }}" id="bank-options">
                         <select name="bank_name" class="form-control">
                             <option value="">-- Pilih Bank --</option>
-                            <option value="bca">BCA</option>
-                            <option value="bri">BRI</option>
-                            <option value="mandiri">Mandiri</option>
-                            <option value="bni">BNI</option>
+                            <option value="bca" {{ old('bank_name') == 'bca' ? 'selected' : '' }}>BCA</option>
+                            <option value="bri" {{ old('bank_name') == 'bri' ? 'selected' : '' }}>BRI</option>
+                            <option value="mandiri" {{ old('bank_name') == 'mandiri' ? 'selected' : '' }}>Mandiri</option>
+                            <option value="bni" {{ old('bank_name') == 'bni' ? 'selected' : '' }}>BNI</option>
                         </select>
                     </div>
 
+                    {{-- E-Wallet --}}
                     <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="payment_method" value="ewallet" id="ewallet">
+                        <input class="form-check-input" type="radio" name="payment_method"
+                               value="ewallet" id="ewallet" {{ old('payment_method') == 'ewallet' ? 'checked' : '' }}>
                         <label class="form-check-label" for="ewallet">E-Wallet</label>
                     </div>
-                    <div class="ms-4 d-none" id="ewallet-options">
+                    <div class="ms-4 {{ old('payment_method') == 'ewallet' ? '' : 'd-none' }}" id="ewallet-options">
                         <select name="ewallet_name" class="form-control">
                             <option value="">-- Pilih E-Wallet --</option>
-                            <option value="dana">DANA</option>
-                            <option value="ovo">OVO</option>
-                            <option value="gopay">GoPay</option>
+                            <option value="dana" {{ old('ewallet_name') == 'dana' ? 'selected' : '' }}>DANA</option>
+                            <option value="ovo" {{ old('ewallet_name') == 'ovo' ? 'selected' : '' }}>OVO</option>
+                            <option value="gopay" {{ old('ewallet_name') == 'gopay' ? 'selected' : '' }}>GoPay</option>
                         </select>
                     </div>
 
-                    <button class="btn btn-dark-checkout w-100 mt-3">LANJUTKAN PEMBAYARAN</button>
+                    <button class="btn btn-dark w-100 mt-3" type="submit">
+                        LANJUTKAN PEMBAYARAN
+                    </button>
+
+                    {{-- Tampilkan error validasi kalau ada --}}
+                    @if ($errors->any())
+                        <div class="mt-3 alert alert-danger">
+                            @foreach ($errors->all() as $error)
+                                <div>{{ $error }}</div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -184,71 +174,93 @@
 @endsection
 
 @push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const provinceSelect = document.getElementById('province');
-    const citySelect     = document.getElementById('city');
-    const districtSelect = document.getElementById('district');
+    const provinceSelect  = document.getElementById('province');
+    const citySelect      = document.getElementById('city');
+    const districtSelect  = document.getElementById('district');
 
-    const transferRadio  = document.getElementById('transfer');
-    const ewalletRadio   = document.getElementById('ewallet');
-    const bankOptions    = document.getElementById('bank-options');
-    const ewalletOptions = document.getElementById('ewallet-options');
+    const subtotalEl      = document.getElementById('subtotal');
+    const ongkirEl        = document.getElementById('ongkir');
+    const totalEl         = document.getElementById('total');
 
-    // ====== LOAD PROVINCES ======
+    const transferRadio   = document.getElementById('transfer');
+    const ewalletRadio    = document.getElementById('ewallet');
+    const bankOptions     = document.getElementById('bank-options');
+    const ewalletOptions  = document.getElementById('ewallet-options');
+
+    const subtotalValue   = parseInt(subtotalEl.dataset.subtotal || 0);
+
+    function formatRupiah(angka) {
+        return 'Rp' + new Intl.NumberFormat('id-ID').format(angka);
+    }
+
+    // ========= LOAD PROVINSI (SE-INDONESIA) =========
     fetch('/ajax/provinces')
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            data.forEach(province => {
-                const option = document.createElement('option');
-                option.value = province.id;      // kirim ID ke backend
-                option.textContent = province.name;
-                provinceSelect.appendChild(option);
+            data.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                provinceSelect.appendChild(opt);
             });
         });
 
-    // ====== LOAD CITIES WHEN PROVINCE SELECTED ======
+    // ========= LOAD KOTA/KABUPATEN =========
     provinceSelect.addEventListener('change', function () {
-        const selectedProvinceId = this.value;
+        const provinceId = this.value;
 
         citySelect.innerHTML     = '<option value="">-- Pilih Kota / Kabupaten --</option>';
         districtSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
 
-        if (!selectedProvinceId) return;
+        if (!provinceId) return;
 
-        fetch(`/ajax/cities?province_id=${selectedProvinceId}`)
-            .then(response => response.json())
+        fetch(`/ajax/cities?province_id=${provinceId}`)
+            .then(res => res.json())
             .then(data => {
-                data.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city.id;       // kirim ID kota
-                    option.textContent = city.name;
-                    citySelect.appendChild(option);
+                data.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.name;
+                    citySelect.appendChild(opt);
                 });
             });
     });
 
-    // ====== LOAD DISTRICTS WHEN CITY SELECTED ======
+    // ========= LOAD KECAMATAN + HITUNG ONGKIR =========
     citySelect.addEventListener('change', function () {
-        const selectedCityId = this.value;
+        const cityId = this.value;
 
         districtSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
 
-        if (!selectedCityId) return;
+        if (!cityId) return;
 
-        fetch(`/ajax/districts?city_id=${selectedCityId}`)
-            .then(response => response.json())
+        fetch(`/ajax/districts?city_id=${cityId}`)
+            .then(res => res.json())
             .then(data => {
-                data.forEach(district => {
-                    const option = document.createElement('option');
-                    option.value = district.id;   // kirim ID kecamatan (lebih konsisten)
-                    option.textContent = district.name;
-                    districtSelect.appendChild(option);
+                data.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.id;
+                    opt.textContent = d.name;
+                    districtSelect.appendChild(opt);
                 });
             });
+
+        // HITUNG ONGKIR via AJAX
+        $.post('/checkout/cek-ongkir', {
+            _token: '{{ csrf_token() }}',
+            city_id: cityId,
+            subtotal: subtotalValue
+        }, function (res) {
+            ongkirEl.textContent = formatRupiah(res.ongkir);
+            totalEl.textContent  = formatRupiah(res.total);
+        });
     });
 
-    // ====== TOGGLE METODE BAYAR ======
+    // ========= TOGGLE METODE PEMBAYARAN =========
     function updatePaymentOptions() {
         if (transferRadio.checked) {
             bankOptions.classList.remove('d-none');
@@ -269,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ewalletRadio.addEventListener('change', updatePaymentOptions);
     }
 
-    // panggil sekali di awal (kalau nanti mau ada default)
+    // set awal (biar pas reload dengan old() tetap sesuai)
     updatePaymentOptions();
 });
 </script>

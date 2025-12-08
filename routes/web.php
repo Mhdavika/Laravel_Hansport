@@ -92,6 +92,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout/success', function () {
         return view('frontend.checkout.success');
     })->name('checkout.success');
+    Route::post('/checkout/cek-ongkir', [CheckoutController::class, 'cekOngkir'])
+    ->name('checkout.cek-ongkir');
+
+
     
     // Chat Routes for Users
     Route::prefix('chat')->name('chat.')->group(function () {

@@ -8,37 +8,29 @@ class RegionController extends Controller
 {
     /**
      * GET /ajax/provinces
-     * Hanya provinsi Pulau Jawa
+     * ✅ SEKARANG: semua provinsi se-Indonesia
      */
     public function getProvinces()
     {
-        $javaProvinces = [
-            'DKI JAKARTA',
-            'JAWA BARAT',
-            'JAWA TENGAH',
-            'DAERAH ISTIMEWA YOGYAKARTA',
-            'JAWA TIMUR',
-            'BANTEN',
-        ];
-
-        // Ambil semua provinsi dari Laravolt, lalu filter
+        // Ambil semua provinsi dari Laravolt Indonesia
         $all = \Indonesia::allProvinces();
 
         $provinces = $all
-            ->whereIn('name', $javaProvinces)
+            ->sortBy('name') // urutkan berdasarkan nama biar rapi
             ->map(function ($prov) {
                 return [
-                    'id'   => $prov->id,    // ini yang dipakai di frontend
+                    'id'   => $prov->id,   // ini yang dipakai di frontend (value option)
                     'name' => $prov->name,
                 ];
             })
-            ->values();
+            ->values(); // reset index
 
         return response()->json($provinces);
     }
 
     /**
      * GET /ajax/cities?province_id=XX
+     * Sudah otomatis se-Indonesia (ikut provinsi yang dipilih)
      */
     public function getCities(Request $request)
     {
@@ -48,7 +40,7 @@ class RegionController extends Controller
             return response()->json([]);
         }
 
-        // Ambil provinsi berdasarkan ID + relasi cities dari Laravolt
+        // Ambil provinsi + relasi cities dari Laravolt
         $province = \Indonesia::findProvince($provinceId, ['cities']);
 
         if (!$province) {
@@ -56,6 +48,7 @@ class RegionController extends Controller
         }
 
         $cities = $province->cities
+            ->sortBy('name')
             ->map(function ($city) {
                 return [
                     'id'   => $city->id,
@@ -69,6 +62,7 @@ class RegionController extends Controller
 
     /**
      * GET /ajax/districts?city_id=YY
+     * Juga sudah otomatis se-Indonesia (ikut kota yang dipilih)
      */
     public function getDistricts(Request $request)
     {
@@ -86,6 +80,7 @@ class RegionController extends Controller
         }
 
         $districts = $city->districts
+            ->sortBy('name')
             ->map(function ($district) {
                 return [
                     'id'   => $district->id,
