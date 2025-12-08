@@ -96,6 +96,18 @@
 
                     @php $subtotal = $total; @endphp
 
+                    <div class="mb-2">
+                        <label class="form-label">Metode Pengiriman *</label>
+                        <select name="shipping_courier" id="shipping_courier" class="form-control" required>
+                            <option value="">-- Pilih Jasa Pengiriman --</option>
+                            <option value="jne"  {{ old('shipping_courier') == 'jne'  ? 'selected' : '' }}>JNE Reguler</option>
+                            <option value="jnt"  {{ old('shipping_courier') == 'jnt'  ? 'selected' : '' }}>J&T Reguler</option>
+                            <option value="pos"  {{ old('shipping_courier') == 'pos'  ? 'selected' : '' }}>POS Kilat Khusus</option>
+                        </select>
+                    </div>
+
+                    <hr>
+
                     <div class="d-flex justify-content-between">
                         <span>Subtotal:</span>
                         <strong id="subtotal" data-subtotal="{{ $subtotal }}">
@@ -105,7 +117,12 @@
 
                     <div class="d-flex justify-content-between">
                         <span>Ongkir:</span>
-                        <strong id="ongkir">Rp0</strong>
+                        <strong id="ongkir" data-raw="0">Rp0</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Estimasi Pengiriman:</span>
+                        <strong id="shipping_eta">-</strong>
                     </div>
 
                     <hr>
@@ -131,10 +148,10 @@
                     <div class="ms-4 mb-3 {{ old('payment_method') == 'transfer' ? '' : 'd-none' }}" id="bank-options">
                         <select name="bank_name" class="form-control">
                             <option value="">-- Pilih Bank --</option>
-                            <option value="bca" {{ old('bank_name') == 'bca' ? 'selected' : '' }}>BCA</option>
-                            <option value="bri" {{ old('bank_name') == 'bri' ? 'selected' : '' }}>BRI</option>
+                            <option value="bca"     {{ old('bank_name') == 'bca' ? 'selected' : '' }}>BCA</option>
+                            <option value="bri"     {{ old('bank_name') == 'bri' ? 'selected' : '' }}>BRI</option>
                             <option value="mandiri" {{ old('bank_name') == 'mandiri' ? 'selected' : '' }}>Mandiri</option>
-                            <option value="bni" {{ old('bank_name') == 'bni' ? 'selected' : '' }}>BNI</option>
+                            <option value="bni"     {{ old('bank_name') == 'bni' ? 'selected' : '' }}>BNI</option>
                         </select>
                     </div>
 
@@ -147,8 +164,8 @@
                     <div class="ms-4 {{ old('payment_method') == 'ewallet' ? '' : 'd-none' }}" id="ewallet-options">
                         <select name="ewallet_name" class="form-control">
                             <option value="">-- Pilih E-Wallet --</option>
-                            <option value="dana" {{ old('ewallet_name') == 'dana' ? 'selected' : '' }}>DANA</option>
-                            <option value="ovo" {{ old('ewallet_name') == 'ovo' ? 'selected' : '' }}>OVO</option>
+                            <option value="dana"  {{ old('ewallet_name') == 'dana' ? 'selected' : '' }}>DANA</option>
+                            <option value="ovo"   {{ old('ewallet_name') == 'ovo' ? 'selected' : '' }}>OVO</option>
                             <option value="gopay" {{ old('ewallet_name') == 'gopay' ? 'selected' : '' }}>GoPay</option>
                         </select>
                     </div>
@@ -185,6 +202,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const subtotalEl      = document.getElementById('subtotal');
     const ongkirEl        = document.getElementById('ongkir');
     const totalEl         = document.getElementById('total');
+    const courierSelect   = document.getElementById('shipping_courier');
+    const etaEl           = document.getElementById('shipping_eta');
 
     const transferRadio   = document.getElementById('transfer');
     const ewalletRadio    = document.getElementById('ewallet');
@@ -230,13 +249,41 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     });
 
-    // ========= LOAD KECAMATAN + HITUNG ONGKIR =========
+    // helper: panggil API cek ongkir kalau city & courier sudah terpilih
+    function hitungOngkirJikaSiap() {
+        const cityId   = citySelect.value;
+        const courier  = courierSelect.value;
+
+        if (!cityId || !courier) {
+            // kalau belum lengkap, reset
+            ongkirEl.textContent = formatRupiah(0);
+            etaEl.textContent    = '-';
+            totalEl.textContent  = formatRupiah(subtotalValue);
+            return;
+        }
+
+        $.post('/checkout/cek-ongkir', {
+            _token: '{{ csrf_token() }}',
+            city_id: cityId,
+            courier: courier,
+            subtotal: subtotalValue
+        }, function (res) {
+            ongkirEl.textContent = formatRupiah(res.ongkir);
+            totalEl.textContent  = formatRupiah(res.total);
+            etaEl.textContent    = res.eta || '-';
+        });
+    }
+
+    // ========= LOAD KECAMATAN =========
     citySelect.addEventListener('change', function () {
         const cityId = this.value;
 
         districtSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
 
-        if (!cityId) return;
+        if (!cityId) {
+            hitungOngkirJikaSiap();
+            return;
+        }
 
         fetch(`/ajax/districts?city_id=${cityId}`)
             .then(res => res.json())
@@ -249,15 +296,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
 
-        // HITUNG ONGKIR via AJAX
-        $.post('/checkout/cek-ongkir', {
-            _token: '{{ csrf_token() }}',
-            city_id: cityId,
-            subtotal: subtotalValue
-        }, function (res) {
-            ongkirEl.textContent = formatRupiah(res.ongkir);
-            totalEl.textContent  = formatRupiah(res.total);
-        });
+        hitungOngkirJikaSiap();
+    });
+
+    // ========= CHANGE COURIER =========
+    courierSelect.addEventListener('change', function () {
+        hitungOngkirJikaSiap();
     });
 
     // ========= TOGGLE METODE PEMBAYARAN =========
@@ -281,7 +325,6 @@ document.addEventListener('DOMContentLoaded', function () {
         ewalletRadio.addEventListener('change', updatePaymentOptions);
     }
 
-    // set awal (biar pas reload dengan old() tetap sesuai)
     updatePaymentOptions();
 });
 </script>

@@ -248,54 +248,101 @@ class CheckoutController extends Controller
     /**
      * ✅ Cek ongkir SE-INDONESIA berdasarkan jarak dari toko (Bogor) ke kota tujuan.
      */
-    public function cekOngkir(Request $request)
-    {
-        $request->validate([
-            'city_id'  => 'required',
-            'subtotal' => 'required|numeric',
-        ]);
+   public function cekOngkir(Request $request)
+{
+    $data = $request->validate([
+        'city_id'  => 'required|integer',
+        'courier'  => 'required|in:jne,jnt,pos',
+        'subtotal' => 'required|integer|min:0',
+    ]);
 
-        $subtotal = (int) $request->subtotal;
-        $cityId   = $request->city_id;
+    $subtotal = (int) $data['subtotal'];
+    $cityId   = (int) $data['city_id'];
+    $courier  = $data['courier'];
 
-        // Koordinat toko (Bogor)
-        $asalLat = -6.599403325394194;
-        $asalLng = 106.81231178112644;
+    // Lokasi toko (Bogor)
+    $asalLat = -6.599403325394194;
+    $asalLng = 106.81231178112644;
 
-        $city = City::findOrFail($cityId);
+    // Kota tujuan dari Laravolt
+    $city = City::findOrFail($cityId);
+    $meta = is_array($city->meta) ? $city->meta : json_decode($city->meta, true);
 
-        // meta menyimpan JSON: {"lat":"...","long":"..."}
-        $meta = is_array($city->meta) ? $city->meta : json_decode($city->meta, true);
+    $tujuanLat = isset($meta['lat'])  ? (float) $meta['lat']  : 0.0;
+    $tujuanLng = isset($meta['long']) ? (float) $meta['long'] : 0.0;
 
-        if (!$meta || empty($meta['lat']) || empty($meta['long'])) {
-            // kalau koordinat belum ada → kasih ongkir default
-            $jarakKm = null;
-            $ongkir  = 40000;
-        } else {
-            $tujuanLat = (float) $meta['lat'];
-            $tujuanLng = (float) $meta['long'];
-
-            $jarakKm = $this->hitungJarak($asalLat, $asalLng, $tujuanLat, $tujuanLng);
-
-            if ($jarakKm <= 20) {
-                $ongkir = 10000;
-            } elseif ($jarakKm <= 100) {
-                $ongkir = 20000;
-            } elseif ($jarakKm <= 250) {
-                $ongkir = 40000;
-            } elseif ($jarakKm <= 750) {
-                $ongkir = 60000;
-            } else {
-                $ongkir = 100000;
-            }
-        }
-
+    if (!$tujuanLat || !$tujuanLng) {
         return response()->json([
-            'jarak_km' => $jarakKm ? round($jarakKm, 2) : null,
-            'ongkir'   => $ongkir,
-            'total'    => $subtotal + $ongkir,
+            'jarak_km' => 0,
+            'ongkir'   => 0,
+            'total'    => $subtotal,
+            'eta'      => '-',
         ]);
     }
+
+    $jarakKm = $this->hitungJarak($asalLat, $asalLng, $tujuanLat, $tujuanLng);
+
+    // ====== TABEL TARIF & ESTIMASI PER JARAK ======
+    if ($jarakKm <= 50) {
+        // Dalam kota / dekat
+        $priceMap = [
+            'jne' => 12000,
+            'jnt' => 11000,
+            'pos' => 10000,
+        ];
+        $etaMap = [
+            'jne' => '1–2 hari',
+            'jnt' => '1–2 hari',
+            'pos' => '2–3 hari',
+        ];
+    } elseif ($jarakKm <= 300) {
+        // Antar kota / provinsi dalam satu pulau
+        $priceMap = [
+            'jne' => 23000,
+            'jnt' => 26000,
+            'pos' => 20000,
+        ];
+        $etaMap = [
+            'jne' => '2–3 hari',
+            'jnt' => '2-3 hari',
+            'pos' => '3–4 hari',
+        ];
+    } elseif ($jarakKm <= 1000) {
+        // Antar pulau dekat
+        $priceMap = [
+            'jne' => 30000,
+            'jnt' => 33000,
+            'pos' => 27000,
+        ];
+        $etaMap = [
+            'jne' => '3–5 hari',
+            'jnt' => '3–5 hari',
+            'pos' => '4–6 hari',
+        ];
+    } else {
+        // Jauh (Sulawesi timur, Maluku, Papua, dll)
+        $priceMap = [
+            'jne' => 50000,
+            'jnt' => 55000,
+            'pos' => 45000,
+        ];
+        $etaMap = [
+            'jne' => '4–7 hari',
+            'jnt' => '4–7 hari',
+            'pos' => '5–8 hari',
+        ];
+    }
+
+    $ongkir = $priceMap[$courier] ?? 30000;
+    $eta    = $etaMap[$courier]   ?? '3–7 hari';
+
+    return response()->json([
+        'jarak_km' => round($jarakKm, 2),
+        'ongkir'   => $ongkir,
+        'total'    => $subtotal + $ongkir,
+        'eta'      => $eta,
+    ]);
+}
 
     /**
      * Helper hitung jarak (KM) pakai Haversine.
