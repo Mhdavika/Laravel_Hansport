@@ -19,7 +19,7 @@
                 <div class="product-item {{ $class }}" style="width: 230px;">
                     <div class="product discount product_filter">
                         <div class="product_image">
-                            <img src="{{ asset( $product->image) }}" alt="{{ $product->name }}">
+                           <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
                         </div>
                         <div class="favorite favorite_left"></div>
 
@@ -32,7 +32,9 @@
                         @endif
 
                         <div class="product_info">
-                            <h6 class="product_name"><a href="#">{{ $product->name }}</a></h6>
+                            <h6 class="product_name">
+                                <a href="{{ route('product.show', $product->id) }}">{{ $product->name }}</a>
+                            </h6>
                             <div class="product_price">
                                 Rp{{ number_format($product->discount_price ?? $product->price, 0, ',', '.') }}
                                 @if($product->discount_price)
@@ -41,7 +43,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="red_button add_to_cart_button"><a href="#">Tambah ke keranjang</a></div>
                 </div>
                 @endforeach
             </div>

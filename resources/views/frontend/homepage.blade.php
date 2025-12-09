@@ -343,55 +343,7 @@ $deadline = \Carbon\Carbon::parse($dealProduct->deal_end_date)->timezone('Asia/J
 
 @include('layouts.benefit')
 
-<!-- Blogs -->
-<div id="blogs" class="blogs">
-	<div class="container">
-		<div class="row">
-			<div class="col text-center">
-				<div class="section_title">
-					<h2>Blog</h2>
-				</div>
-			</div>
-		</div>
 
-		<div class="row blogs_container">
-			@foreach ($blogs as $blog)
-			@php
-			$imagePath = asset('storage/' . $blog->image);
-			@endphp
-
-			<div class="col-lg-4 blog_item_col">
-				<div class="blog_item">
-					<div class="blog_background" style="background-image:url('{{ $imagePath }}')"></div>
-					<div class="blog_content d-flex flex-column align-items-center justify-content-center text-center">
-						<h4 class="blog_title">{{ $blog->title }}</h4>
-						<span class="blog_meta">by {{ strtoupper($blog->author) }} | {{ \Carbon\Carbon::parse($blog->published_at)->format('M d, Y') }}</span>
-						<a class="blog_more" href="#" data-toggle="modal" data-target="#blogModal{{ $blog->id }}">Read more</a>
-					</div>
-				</div>
-			</div>
-
-			<!-- Modal -->
-			<div class="modal fade" id="blogModal{{ $blog->id }}" tabindex="-1" aria-labelledby="blogModalLabel{{ $blog->id }}" aria-hidden="true">
-				<div class="modal-dialog modal-lg modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="blogModalLabel{{ $blog->id }}">{{ $blog->title }}</h5>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body">
-							<img src="{{ $imagePath }}" class="img-fluid mb-3" alt="{{ $blog->title }}">
-							<p>{!! nl2br(e($blog->content)) !!}</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			@endforeach
-		</div>
-	</div>
-</div>
 @endsection
 
 @push('scripts')
