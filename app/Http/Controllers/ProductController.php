@@ -6,21 +6,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Cart;
+use App\Models\User;
 
 class ProductController extends Controller
 {
- // ProductController.php
-// app/Http/Controllers/ProductController.php
-public function show($id)
-{
-    $product = Product::with('sizes')->findOrFail($id); // Muat ukuran produk
-    return view('frontend.product.show', compact('product'));
-}
+    public function show($id)
+    {
+        $product = Product::with('category')->findOrFail($id);
+        return view('frontend.product.show', compact('product'));
+    }
 
 
-
-
-
+    public function preview($id)
+    {
+        $product = Product::findOrFail($id);
+        return view('frontend.product.preview', compact('product'));
+    }
 
     public function store(Request $request)
     {
@@ -34,7 +35,7 @@ public function show($id)
         // Validasi ukuran jika produk punya ukuran
         if ($product->has_size) {
             $request->validate([
-                'size' => 'required|in:' . implode(',', $product->sizes->pluck('size')->toArray()),
+                'size' => 'required|in:' . implode(',', $product->size_list),
             ]);
         }
 
@@ -43,14 +44,14 @@ public function show($id)
             'quantity' => 'required|integer|min:1|max:' . $product->stock,
         ]);
 
-    // Simpan ke keranjang
-    Cart::create([
-        'user_id'    => $user->id,
-        'product_id' => $product->id,
-        'quantity'   => $request->quantity,
-        'size'       => $request->size ?? null,
-    ]);
+        // Simpan ke keranjang
+        Cart::create([
+            'user_id'    => $user->id,
+            'product_id' => $product->id,
+            'quantity'   => $request->quantity,
+            'size'       => $request->size ?? null,
+        ]);
 
-    return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
+        return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
     }
 }

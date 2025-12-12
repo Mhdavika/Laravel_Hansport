@@ -362,4 +362,18 @@ class CheckoutController extends Controller
 
         return $earthRadius * $c;
     }
+
+    public function show($id)
+{
+    // Ambil data pesanan berdasarkan ID
+    $order = Order::with('items.product')->find($id);
+
+    if (!$order) {
+        return redirect()->route('profile.orders')->with('error', 'Pesanan tidak ditemukan.');
+    }
+
+    // Kembalikan view dengan data pesanan
+    return view('frontend.profile.order_detail', compact('order'));
+}
+
 }

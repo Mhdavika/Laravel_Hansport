@@ -14,6 +14,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\OrderControlleruser;
 
 // Admin Controllers
 use App\Http\Controllers\Admin\DashboardController;
@@ -94,6 +95,17 @@ Route::middleware(['auth'])->group(function () {
     })->name('checkout.success');
     Route::post('/checkout/cek-ongkir', [CheckoutController::class, 'cekOngkir'])
     ->name('checkout.cek-ongkir');
+    Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
+    // Middleware untuk pengguna biasa
+    Route::middleware(['auth'])->group(function () {
+    // Rute untuk melihat detail pesanan pengguna
+    Route::get('/order/{order}', [App\Http\Controllers\Frontend\OrderController::class, 'show'])->name('order.detail');
+});
+
+
+    
+
+
 
 
     
@@ -103,6 +115,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [ChatController::class, 'store'])->name('store');
     });
 });
+
+
+
 
 // Admin Routes
 Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
@@ -114,7 +129,13 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     
     // Pesanan Admin
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+   // Admin route
+    // Admin route (Pastikan tidak bercampur dengan rute frontend)
+    Route::prefix('admin')->middleware('admin')->group(function () {
+    Route::get('/order/{order}', [App\Http\Controllers\Admin\OrderController::class, 'show'])->name('admin.order.detail');
+    });
+
+
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     
     // Daftar Pengguna Admin
@@ -128,7 +149,8 @@ Route::prefix('admin')->middleware('auth')->name('admin.')->group(function () {
     
     // Pencarian Admin
     Route::get('/search', [AdminSearchController::class, 'index'])->name('search.index');
-    
+    Route::get('/admin/chat/{userId}', [ChatController::class, 'adminChats'])->name('admin.chat');
+
     // Chat Routes for Admin
     Route::prefix('chat')->name('chat.')->group(function () {
         Route::get('/users', [ChatController::class, 'adminChats'])->name('users');

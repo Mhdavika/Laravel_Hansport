@@ -20,7 +20,6 @@
     {{-- Menampilkan ukuran produk --}}
     @foreach ($cartItems as $cartItem)
         @if($cartItem->size)
-            <p>Ukuran: {{ strtoupper($cartItem->size) }}</p>
         @endif
     @endforeach
 
@@ -49,7 +48,10 @@
                                     <img src="{{ asset('storage/' . $item->product->image) }}" alt="" width="60" class="me-2">
                                 @endif
                                 <div>
-                                    <strong>{{ $item->product->name ?? 'Produk tidak ditemukan' }}</strong><br>
+                                    <!-- Tautan ke halaman detail produk -->
+                                    <a href="{{ route('product.show', $item->product->id) }}" class="product-link">
+                                        <strong>{{ $item->product->name ?? 'Produk tidak ditemukan' }}</strong>
+                                    </a><br>
                                     @if($item->size)
                                         <small>Ukuran: {{ $item->size }}</small>
                                     @endif
@@ -134,6 +136,36 @@
 
             window.location.href = url;
         });
+
+        // Cek parameter URL dan tandai produk yang sudah dipilih
+        const urlParams = new URLSearchParams(window.location.search);
+        const cartIds = urlParams.getAll('cart_ids[]');
+        
+        if (cartIds.length > 0) {
+            // Tandai checkbox berdasarkan ID produk yang ada di URL
+            cartIds.forEach(cartId => {
+                const checkbox = document.querySelector(`input.cart-checkbox[value="${cartId}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
     });
 </script>
+@endpush
+
+
+@push('styles')
+<style>
+    /* Styling untuk link produk agar warna teks hitam */
+    .product-link {
+        color: #000 !important; /* Warna hitam */
+        text-decoration: none; /* Menghilangkan underline */
+    }
+
+    /* Efek hover untuk memberikan underline saat mouse berada di atas link */
+    .product-link:hover {
+        text-decoration: underline; /* Menambahkan underline saat hover */
+    }
+</style>
 @endpush

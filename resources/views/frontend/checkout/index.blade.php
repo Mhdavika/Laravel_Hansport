@@ -97,7 +97,7 @@
                     @php $subtotal = $total; @endphp
 
                     <div class="mb-2">
-                        <label class="form-label">Metode Pengiriman *</label>
+                        <label class="form-label">Jasa Pengiriman *</label>
                         <select name="shipping_courier" id="shipping_courier" class="form-control" required>
                             <option value="">-- Pilih Jasa Pengiriman --</option>
                             <option value="jne"  {{ old('shipping_courier') == 'jne'  ? 'selected' : '' }}>JNE Reguler</option>

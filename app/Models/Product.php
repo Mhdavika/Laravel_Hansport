@@ -17,6 +17,7 @@ class Product extends Model
         'desc_image_1',
         'desc_image_2',
         'desc_image_3',
+        'color_options',
         'size_options',
         'has_size',
         'is_deal',
@@ -25,30 +26,33 @@ class Product extends Model
         'is_best_seller',
     ];
 
-    // Relasi ke kategori (setiap produk dimiliki satu kategori)
-    // Model Product
-public function category()
-{
-    return $this->belongsTo(Category::class);
-}
+    /**
+     * Relasi ke kategori (setiap produk dimiliki satu kategori)
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
-
-    // Relasi ke ukuran produk (ProductSize)
-   // app/Models/Product.php
-public function sizes()
-{
-    return $this->hasMany(ProductSize::class);
-}
-
-
-
-    // Relasi dengan likes (jika ada)
+    /**
+     * Relasi ke tabel likes (satu produk bisa punya banyak like)
+     */
     public function likes()
     {
         return $this->hasMany(Like::class);
     }
 
-    // Accessor untuk mengubah size_options (string) menjadi array ukuran
+    /**
+     * Accessor untuk mengambil warna utama (jika ada banyak warna)
+     */
+    public function getColorValueAttribute()
+    {
+        return trim($this->color_options);
+    }
+
+    /**
+     * Accessor untuk mengubah size_options (string) menjadi array ukuran
+     */
     public function getSizeListAttribute()
     {
         return array_filter(explode(',', $this->size_options));

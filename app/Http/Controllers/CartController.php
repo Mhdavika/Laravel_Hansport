@@ -2,115 +2,120 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Product;
 use App\Models\Cart;
-use App\Models\ProductSize;
+use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
     /**
-     * Tampilkan halaman keranjang.
+     * Tampilkan halaman cart.
      */
-   public function index()
-{
-    $cartItems = Cart::where('user_id', Auth::id())->with('product')->get(); // Mengambil semua item keranjang untuk user yang sedang login
-    $cartTotal = $cartItems->sum(function($item) {
-        return $item->product->price * $item->quantity; // Menghitung total harga keranjang
-    });
-
-    return view('frontend.cart.index', compact('cartItems', 'cartTotal'));
-}
-
-    public function create()
+    public function index()
     {
-        //
+        $user = Auth::user();
+
+        $cartItems = Cart::with('product')
+            ->where('user_id', $user->id)
+            ->get();
+
+        $cartTotal = $cartItems->sum(function ($item) {
+            return $item->product->price * $item->quantity;
+        });
+
+        return view('frontend.cart.index', compact('cartItems', 'cartTotal'));
     }
 
     /**
-     * Tambah produk ke keranjang.
-     * - Kalau belum login: diarahkan ke halaman login
-     * - Kalau sudah login: produk dimasukkan ke keranjang
+     * Tambah produk ke cart.
+     * Dipakai saat klik "Tambah ke keranjang".
      */
-  public function store(Request $request)
-{
-    // Validasi
-    $product = Product::findOrFail($request->product_id);
-    $size = $request->size;
-
-    // Validasi jika ukuran tidak dipilih
-    if ($product->has_size && !$size) {
-        return redirect()->back()->with('error', 'Silakan pilih ukuran produk.');
-    }
-
-    // Cek stok berdasarkan ukuran jika produk punya ukuran
-    if ($product->has_size) {
-        $productSize = ProductSize::where('product_id', $product->id)
-            ->where('size', $size)
-            ->first();
-
-        if (!$productSize || $productSize->stock <= 0) {
-            return redirect()->back()->with('error', 'Ukuran yang dipilih tidak tersedia.');
-        }
-    }
-
-    // Simpan ke keranjang
-    Cart::create([
-        'user_id' => Auth::id(),
-        'product_id' => $product->id,
-        'quantity' => $request->quantity,
-        'size' => $size, // Menyimpan ukuran yang dipilih
-    ]);
-
-    return redirect()->route('cart.index')->with('success', 'Produk berhasil ditambahkan ke keranjang.');
-}
-    public function show(string $id)
+    public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity'   => 'nullable|integer|min:1',
+            'size'       => 'nullable|string|max:50',
+        ]);
 
-    public function edit(string $id)
-    {
-        //
-    }
+        $user = Auth::user();
+        $product = Product::findOrFail($request->product_id);
 
-    /**
-     * Update quantity produk di keranjang.
-     */
-    public function update(Request $request, $id)
-    {
-        $cartItem = Cart::where('user_id', Auth::id())
-            ->where('id', $id)
-            ->firstOrFail();
+        $qty = $request->input('quantity', 1);
 
-        $product = $cartItem->product;
-        $action  = $request->input('action');
-
-        if ($action === 'increase' && $cartItem->quantity < $product->stock) {
-            $cartItem->increment('quantity');
-        }
-
-        if ($action === 'decrease' && $cartItem->quantity > 1) {
-            $cartItem->decrement('quantity');
-        }
-
-        return back()->with('success', 'Jumlah produk diperbarui.');
-    }
-
-    /**
-     * Hapus item dari keranjang.
-     */
-    public function destroy($id)
-    {
-        $cartItem = Cart::where('user_id', Auth::id())
-            ->where('id', $id)
+        // cek apakah item dengan product & size yang sama sudah ada di cart
+        $cartItem = Cart::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->when($request->size, function ($q) use ($request) {
+                $q->where('size', $request->size);
+            })
             ->first();
 
         if ($cartItem) {
-            $cartItem->delete();
+            $cartItem->quantity += $qty;
+            $cartItem->save();
+        } else {
+            Cart::create([
+                'user_id'    => $user->id,
+                'product_id' => $product->id,
+                'quantity'   => $qty,
+                'size'       => $request->size, // boleh null
+            ]);
         }
 
-        return back()->with('success', 'Produk berhasil dihapus dari keranjang!');
+        return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
+
     }
+
+    /**
+     * Update jumlah produk di cart (tombol + dan -).
+     * Di view kamu mengirim field "action" = increase / decrease.
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'action' => 'required|in:increase,decrease',
+        ]);
+
+        $user = Auth::user();
+
+        $cartItem = Cart::with('product')
+            ->where('user_id', $user->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        if ($request->action === 'increase') {
+            // batasi sesuai stok produk
+            if ($cartItem->quantity < $cartItem->product->stock) {
+                $cartItem->quantity++;
+            }
+        } else {
+            // decrease
+            if ($cartItem->quantity > 1) {
+                $cartItem->quantity--;
+            }
+        }
+
+        $cartItem->save();
+
+        return redirect()->back();
+    }
+
+    /**
+     * Hapus item dari cart.
+     */
+    public function remove($id)
+    {
+        $user = Auth::user();
+
+        Cart::where('user_id', $user->id)
+            ->where('id', $id)
+            ->delete();
+
+        return redirect()->back()->with('success', 'Produk dihapus dari keranjang.');
+    }
+
+    public function destroy($id){ return $this->remove($id); }
+
 }

@@ -30,10 +30,23 @@
     <style>
         html { scroll-behavior: smooth; }
         .favorite::before, .favorite::after { content:none!important; }
+
+        /* ===============================
+           HIDE/SHOW HEADER ON SCROLL
+           Scroll down -> hide header
+           Scroll up   -> show header
+        =============================== */
+        header.header {
+            transition: transform 1s ease, top 2s ease;
+            will-change: transform;
+        }
+        header.header.is-hidden {
+            transform: translateY(-100%);
+        }
     </style>
 </head>
 
-<body class="{{ request()->is('chat*') ? 'chat-page' : '' }}"> <!-- Menambahkan kelas chat-page hanya di halaman chat -->
+<body class="{{ request()->is('chat*') ? 'chat-page' : '' }}">
 
 <div class="super_container">
 
@@ -103,7 +116,6 @@
                                 <li><a href="{{ route('shop.index') }}">shop</a></li>
                                 <li><a href="{{ route('info-promo.index') }}">info & promo</a></li>
                                 <li><a href="{{ route('contact.index') }}">contact</a></li>
-
                             </ul>
 
                             <ul class="navbar_user">
@@ -119,7 +131,6 @@
 
                                 <li><a href="{{ route('profile.index') }}"><i class="fa fa-user"></i></a></li>
 
-                                <!-- Ikon Keranjang Belanja -->
                                 <li class="checkout" style="position:relative;">
                                     <a href="{{ route('cart.index') }}">
                                         <i class="fa fa-shopping-cart"></i>
@@ -129,7 +140,6 @@
                                     </a>
                                 </li>
 
-                                <!-- Ikon Pesan: Menambahkan tombol chat dengan admin -->
                                 <li>
                                     <a href="{{ route('chat.index') }}" class="btn btn-dark">
                                         <i class="fa fa-comment"></i>
@@ -199,29 +209,7 @@
 
             <div class="row">
 
-                <div class="col-lg-6">
-                    <div class="footer_nav_container d-flex flex-sm-row flex-column align-items-center justify-content-lg-start justify-content-center text-center">
-                        <ul class="footer_nav">
-                            <li><a href="{{ route('homepage') }}">home</a></li>
-                            <li><a href="{{ route('shop.index') }}">shop</a></li>
-                            <li><a href="{{ route('info-promo.index') }}">info & promo</a></li>
-                            <li><a href="{{ route('contact.index') }}">contact</a></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="footer_social d-flex flex-row align-items-center justify-content-lg-end justify-content-center">
-                        <ul>
-                            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                            <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                            <li><a href="#"><i class="fa fa-skype"></i></a></li>
-                            <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                        </ul>
-                    </div>
-                </div>
-
+                
             </div>
 
             <div class="row mt-3">
@@ -254,6 +242,7 @@
 
 @stack('scripts')
 
+<!-- Toggle Search -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const icon = document.getElementById('search-icon');
@@ -266,6 +255,52 @@
             });
         }
     });
+</script>
+
+<!-- Hide/Show Header on Scroll -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const header = document.querySelector("header.header");
+    if (!header) return;
+
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    let lastDirection = null; // Menyimpan arah scroll terakhir
+    const THRESHOLD = 8; // Batas kecil pergerakan scroll
+    const DELAY = 100; // Delay dalam ms (100ms)
+    let timeout;
+    
+    function handleScroll() {
+        const currentScrollY = window.scrollY;
+        const diff = currentScrollY - lastScrollY;
+
+        // kalau di posisi paling atas, header selalu tampil
+        if (currentScrollY <= 0) {
+            header.classList.remove("is-hidden");
+            lastScrollY = 0;
+            return;
+        }
+
+        // gerakan kecil diabaikan biar nggak kedip
+        if (Math.abs(diff) < THRESHOLD) return;
+
+        // scroll down -> hide, scroll up -> show
+        if (diff > 0) header.classList.add("is-hidden");
+        else header.classList.remove("is-hidden");
+
+        lastScrollY = currentScrollY;
+    }
+
+    window.addEventListener("scroll", function () {
+        if (!ticking) {
+            window.requestAnimationFrame(function () {
+                handleScroll();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+});
 </script>
 
 @if(session('success'))

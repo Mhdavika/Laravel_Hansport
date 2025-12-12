@@ -17,7 +17,7 @@ $category3 = asset('frontend/images/cat3.png');
 				<div class="main_slider_content">
 					<h6>Koleksi Terbaru 2025</h6>
 					<h1>Diskon 30% untuk Pengguna Baru</h1>
-					<div class="red_button shop_now_button"><a href="#">Belanja</a></div>
+					<div class="red_button shop_now_button"><a href="{{ route('shop.index') }}">Belanja</a></div>
 				</div>
 			</div>
 		</div>
